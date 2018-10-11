@@ -234,6 +234,7 @@ describe('A <Field />', () => {
         />,
         node
       );
+
       expect(actual.innerRef).toBe(innerRef);
     });
   });
@@ -282,6 +283,27 @@ describe('A <Field />', () => {
         node
       );
     });
+
+    it('forwards innerRef through field', () => {
+      const innerRef = jest.fn();
+
+      ReactDOM.render(
+        <TestForm
+          render={(_: FormikProps<TestFormValues>) => (
+            <Field
+              name="name"
+              innerRef={innerRef}
+              render={({ field }: FieldProps) => {
+                expect(field.innerRef).toEqual(innerRef);
+
+                return null;
+              }}
+            />
+          )}
+        />,
+        node
+      );
+    });
   });
 
   describe('<Field children />', () => {
@@ -320,6 +342,27 @@ describe('A <Field />', () => {
       );
 
       expect(node.innerHTML).toContain(TEXT);
+    });
+
+    it('forwards innerRef through field', () => {
+      const innerRef = jest.fn();
+
+      ReactDOM.render(
+        <TestForm
+          render={(_: FormikProps<TestFormValues>) => (
+            <Field
+              name="name"
+              innerRef={innerRef}
+              children={({ field }: FieldProps) => {
+                expect(field.innerRef).toEqual(innerRef);
+
+                return null;
+              }}
+            />
+          )}
+        />,
+        node
+      );
     });
 
     it('warns if both string component and children as a function', () => {

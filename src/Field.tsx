@@ -37,6 +37,8 @@ export interface FieldProps<V = any> {
     value: any;
     /* name of the input */
     name: string;
+    /* innerRef for the field */
+    innerRef?: React.Ref<any>;
   };
   form: FormikProps<V>; // if ppl want to restrict this for a given form, let them.
 }
@@ -142,6 +144,7 @@ class FieldInner<Values = {}, Props = {}> extends React.Component<
       children,
       component = 'input',
       formik,
+      innerRef,
       ...props
     } = (this.props as FieldAttributes<Props> & {
       formik: FormikContext<Values>;
@@ -160,7 +163,14 @@ class FieldInner<Values = {}, Props = {}> extends React.Component<
       onChange: formik.handleChange,
       onBlur: formik.handleBlur,
     };
-    const bag = { field, form: restOfFormik };
+
+    const bag = {
+      field: {
+        innerRef,
+        ...field,
+      },
+      form: restOfFormik,
+    };
 
     if (render) {
       return (render as any)(bag);
@@ -171,18 +181,19 @@ class FieldInner<Values = {}, Props = {}> extends React.Component<
     }
 
     if (typeof component === 'string') {
-      const { innerRef, ...rest } = props;
       return React.createElement(component as any, {
         ref: innerRef,
         ...field,
-        ...rest,
+        ...props,
         children,
       });
     }
 
     return React.createElement(component as any, {
-      ...bag,
+      field,
+      form: restOfFormik,
       ...props,
+      innerRef,
       children,
     });
   }

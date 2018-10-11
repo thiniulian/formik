@@ -20,7 +20,7 @@ Aside from string-only `component`, each render prop is passed the same props fo
 
 Field's render props are an object containing:
 
-* `field`: An object containing `onChange`, `onBlur`, `name`, and `value` of the field
+* `field`: An object containing `onChange`, `onBlur`, `name`, and `value` of the field. Also the `innerRef` prop is forwarded in this object
 * `form`: The Formik bag.
 * Any other props passed to field
 
@@ -158,7 +158,42 @@ const CustomInputComponent = ({
 
 `innerRef?: (el: React.HTMLElement<any> => void)`
 
-When you are **not** using a custom component and you need to access the underlying DOM node created by `Field` (e.g. to call `focus`), pass the callback to the `innerRef` prop instead.
+When you need to access the underlying DOM node created by `Field` (e.g. to call `focus`), pass the callback to the `innerRef` prop instead.
+This prop is used for each case as follows:
+* passed to the `ref` prop on a string component ('input', 'textarea', etc.)
+```jsx
+  <Field innerRef={innerRef} name="myField" type="input" />
+```
+* passed in the `field` property when using render props, children as a function,
+```jsx
+  <Field name="myField" render={({field, form}) =>
+    const {onChange, onBlur, name, value, innerRef} = field
+    <input ref={innerRef} />
+  }
+```
+* passed as `innerRef` as prop to a custom component (very useful when used with styled-components)
+```jsx
+  <Field name="firstName" component={CustomInputComponent} placeholder="First Name"/>
+
+  const CustomInputComponent = ({
+    field, // { name, value, onChange, onBlur, innerRef }
+    form: { touched, errors }, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+    innerRef, // useful for usage with third-party libraries that have support for innerRef prop (e.g. styled-components)
+    ...props
+  }) => (
+    <div>
+      <input type="text" ref={innerRef} {...field} {...props} />
+      {touched[field.name] &&
+        errors[field.name] && <div className="error">{errors[field.name]}</div>}
+    </div>
+  );
+
+  <Field name="firstName" component={StyledComponent} placeholder="First Name"/>
+
+  const StyledComponent = styled.input`
+    border: 1px solid watermellon;
+  `
+```
 
 ### `name`
 
